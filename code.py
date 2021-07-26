@@ -1,49 +1,59 @@
-import plotly.figure_factory as ff
-import plotly.graph_objects as go
+import plotly.figure_factory as ff 
 import statistics
 import random
-import pandas as pd
 import csv
+import pandas as pd 
+import plotly.graph_objects as go 
+
 
 df = pd.read_csv("class111/medium_data.csv")
-data = df["id"].tolist()
+data = df["id"].to_list()
+
+data_mean = statistics.mean(data)
+data_stdDev = statistics.stdev(data)
+
+print("Mean of the data is {}".format(data_mean))
+print("Standard Deviation of the data is {}".format(data_stdDev))
 
 def random_set_of_mean(counter):
-    dataset = []
-    for i in range(0, counter):
-        random_index= random.randint(0,len(data))
-        value = data[random_index]
-        dataset.append(value)
-    mean = statistics.mean(dataset)
+    dataSet = []
+    for i in range(0,counter):
+        randomIndex = random.randint(0,len(data)-1)
+        value = data[randomIndex]
+        dataSet.append(value)
+    mean = statistics.mean(dataSet)
     return mean
 
-def show_fig(mean_list):
-    df = mean_list
-    fig = ff.create_distplot([df], ["temp"], show_hist=False)
-    fig.show()
+meanlist = []
 
-def setup():
-    mean_list = []
-    for i in range(0,100):
-        set_of_means= random_set_of_mean(30)
-        mean_list.append(set_of_means)
-    show_fig(mean_list)
-    
-    mean = statistics.mean(mean_list)
-    print("Mean of sampling distribution :-",mean )
+for i in range(0,1000):
+    Set_of_mean = random_set_of_mean(100)
+    meanlist.append(Set_of_mean)
 
-setup()
+stdDev = statistics.stdev(meanlist)
 
-population_mean = statistics.mean(data)
-print("population mean:- ", population_mean)
+mean = statistics.mean(meanlist)
 
-def std():
-    mean_list = []
-    for i in range(0,1000):
-        set_of_means= random_set_of_mean(100)
-        mean_list.append(set_of_means)
+firststdDevStart, firststdDevEnd = mean - stdDev, mean + stdDev
+secondstdDevStart, secondstdDevEnd = mean - (2*stdDev), mean + (2*stdDev)
 
-    std_deviation = statistics.stdev(mean_list)
-    print("Standard deviation of sampling distribution:- ", std_deviation)
+thirdstdDevStart, thirdstdDevEnd = mean - (3*stdDev), mean + (3*stdDev)
 
-std()
+df = pd.read_csv("data.csv")
+data = df["id"].to_list()
+
+meanOfSample = statistics.mean(data)
+
+print("Mean of Sampling Distribution", meanOfSample)
+
+fig = ff.create_distplot([meanlist],["Population Mean"], show_hist = False)
+fig.add_trace(go.Scatter(x=[mean, mean], y=[0,0.17],mode = "lines",name = "Mean"))
+fig.add_trace(go.Scatter(x=[meanOfSample, meanOfSample], y=[0,0.17],mode = "lines",name = "Mean of Sample"))
+fig.add_trace(go.Scatter(x=[firststdDevEnd,firststdDevEnd], y=[0,0.17],mode = "lines",name = "Standard Deviation 1 end"))
+fig.show()
+
+zScore = (meanOfSample - mean)/stdDev
+
+
+
+print("Z Score is = ", zScore)
